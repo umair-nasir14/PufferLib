@@ -30,7 +30,15 @@ class EpisodeStats(gymnasium.Wrapper):
 
         self.info['episode_return'].append(reward)
         self.info['episode_length'] += 1
-
+        if self.info['episode_length'] > 2000:
+            terminated = True
+        
+        #if info['success']:
+        #    self.info['success_rate'].append(1)
+        #else:
+        #    self.info['success_rate'].append(0)
+        #del info['success']
+        
         info = {}
         if terminated or truncated:
             for k, v in self.info.items():
