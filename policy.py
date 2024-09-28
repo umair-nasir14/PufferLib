@@ -9,7 +9,7 @@ import pufferlib.models
 
 
 class Recurrent(pufferlib.models.LSTMWrapper):
-    def __init__(self, env, policy, input_size=512, hidden_size=512, num_layers=2):
+    def __init__(self, env, policy, input_size=128, hidden_size=128, num_layers=4):
         super().__init__(env, policy, input_size, hidden_size, num_layers)
 
 class CNN_Policy(pufferlib.models.Convolutional):
@@ -94,7 +94,7 @@ class Policy(nn.Module):
     the recurrent cell into encode_observations and put everything after
     into decode_actions.
     '''
-    def __init__(self, env, hidden_size=512):
+    def __init__(self, env, hidden_size=128):
         super().__init__()
         
         self.encoder = nn.Linear(np.prod(

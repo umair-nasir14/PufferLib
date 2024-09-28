@@ -39,7 +39,7 @@ class MechEnv(gym.Env):
         self.tiles = tiles
         self.tiles_without_char = tiles_without_char
         self.action_space = spaces.Discrete(6)  # Up, down, left, right, pick, hit
-        self.char_set = {'A': 0, 'B': 1, 'O': 2, '@': 3, '#': 4, '&': 5, '\\n': 6}
+        self.char_set = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'O': 4, '@': 5, '#': 6, '&': 7}
         self.char_to_int = lambda c: self.char_set.get(c, 0)
 
         max_width = max(len(row) for row in self.map_str)
@@ -189,12 +189,16 @@ class MechEnv(gym.Env):
             new_tile = self.map[new_row][new_col]
             if new_tile in self.walkable_tiles:
                 self.update_player_position(new_row, new_col)
-                #reward -= 0.1
+                if new_tile == "C": #or new_tile == "D":
+                    reward += 1
+                #else:
+                #    reward -= 0.1
         return reward
         
     def pick_object(self):
         reward = 0
         self.picked_object = False
+        #if not self.picked_object:
         adjacent_positions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # Up, Down, Left, Right
         for dx, dy in adjacent_positions:
             x, y = self.player_pos
@@ -205,7 +209,7 @@ class MechEnv(gym.Env):
                 if target_tile in self.interactive_object_tiles:
                     #print("Picked an object!")
                     self.map[new_y][new_x] = self.default_walkable_tile 
-                    reward = 5
+                    reward = 0.5
                     self.picked_object = True
                     break 
         return reward
@@ -222,12 +226,12 @@ class MechEnv(gym.Env):
                 if target_tile in self.enemy_tiles: 
                     #print("Hit an enemy!")
                     if self.picked_object:
-                        reward = 50
+                        reward = 5
                         self.enemy_hit = True
                         #self.success_rate += 1
                         self.map[new_y][new_x] = self.default_walkable_tile 
                     else:
-                        reward = -10
+                        reward = -1
                     #reward = 10
                     #self.enemy_hit = True
                     
@@ -322,17 +326,17 @@ def make(name):
     str_world = """BBBBBBBBBBB
 BAAAAAAAAAB
 BAAAAAAAAAB
-BAAAAAAAAAB
-B#AAOAA@AAB
+BCCAAAA@AAB
+B#CAOAAAAAB
 BBBBBBBBBBB"""
     str_map_wo_chars = """BBBBBBBBBBB
 BAAAAAAAAAB
 BAAAAAAAAAB
-BAAAAAAAAAB
-BAAAOAAAAAB
+BCCCCCAAAAB
+BACCOCAAAAB
 BBBBBBBBBBB"""
 
-    walkables = ['A', 'B']
+    walkables = ['A']
     interactive_object_tiles = ['O']
     player_tile = '@'
     enemy_tiles = ["#"]
@@ -344,6 +348,8 @@ BBBBBBBBBBB"""
 
     env_image["A"] = Image.open(r"C:/Users/DELL/Projects/Research/game_mech_desc/world_tileset_data/td_world_floor_grass_c.png").convert("RGBA")
     env_image["B"] = Image.open(r"C:/Users/DELL/Projects/Research/game_mech_desc/world_tileset_data/td_world_wall_stone_h_a.png").convert("RGBA")
+    env_image["C"] = Image.open(r"C:/Users/DELL/Projects/Research/game_mech_desc/world_tileset_data/td_world_floor_grass_c.png").convert("RGBA")
+    #env_image["D"] = Image.open(r"C:/Users/DELL/Projects/Research/game_mech_desc/world_tileset_data/td_world_floor_grass_c.png").convert("RGBA")
     env_image["O"] = Image.open(r"C:/Users/DELL/Projects/Research/game_mech_desc/world_tileset_data/td_world_chest.png").convert("RGBA")
     env_image["@"] = Image.open(r"C:/Users/DELL/Projects/Research/game_mech_desc/character_sprite_data/td_monsters_archer_d1.png").convert("RGBA")
     env_image["#"] = Image.open(r"C:/Users/DELL/Projects/Research/game_mech_desc/character_sprite_data/td_monsters_witch_d1.png").convert("RGBA")
