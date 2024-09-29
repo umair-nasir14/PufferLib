@@ -209,7 +209,7 @@ class MechEnv(gym.Env):
                 if target_tile in self.interactive_object_tiles:
                     #print("Picked an object!")
                     self.map[new_y][new_x] = self.default_walkable_tile 
-                    reward = 0.5
+                    #reward = 0.5
                     self.picked_object = True
                     break 
         return reward
@@ -225,13 +225,13 @@ class MechEnv(gym.Env):
                 target_tile = self.map[new_y][new_x]
                 if target_tile in self.enemy_tiles: 
                     #print("Hit an enemy!")
-                    if self.picked_object:
-                        reward = 5
-                        self.enemy_hit = True
-                        #self.success_rate += 1
-                        self.map[new_y][new_x] = self.default_walkable_tile 
-                    else:
-                        reward = -1
+                    #if self.picked_object:
+                    reward = 5
+                    self.enemy_hit = True
+                    #self.success_rate += 1
+                    self.map[new_y][new_x] = self.default_walkable_tile 
+                    #else:
+                    #    reward = -1
                     #reward = 10
                     #self.enemy_hit = True
                     
@@ -326,14 +326,14 @@ def make(name):
     str_world = """BBBBBBBBBBB
 BAAAAAAAAAB
 BAAAAAAAAAB
-BCCAAAA@AAB
-B#CAOAAAAAB
+BAAAAAAAAAB
+B#AA@AAAAAB
 BBBBBBBBBBB"""
     str_map_wo_chars = """BBBBBBBBBBB
 BAAAAAAAAAB
 BAAAAAAAAAB
-BCCCCCAAAAB
-BACCOCAAAAB
+BAAAAAAAAAB
+BAAAAAAAAAB
 BBBBBBBBBBB"""
 
     walkables = ['A']

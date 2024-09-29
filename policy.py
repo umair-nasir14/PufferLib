@@ -9,7 +9,7 @@ import pufferlib.models
 
 
 class Recurrent(pufferlib.models.LSTMWrapper):
-    def __init__(self, env, policy, input_size=128, hidden_size=128, num_layers=2):
+    def __init__(self, env, policy, input_size=512, hidden_size=512, num_layers=2):
         super().__init__(env, policy, input_size, hidden_size, num_layers)
 
 class CNN_Policy(pufferlib.models.Convolutional):
@@ -94,7 +94,7 @@ class Policy(nn.Module):
     the recurrent cell into encode_observations and put everything after
     into decode_actions.
     '''
-    def __init__(self, env, hidden_size=128):
+    def __init__(self, env, hidden_size=512):
         super().__init__()
         
         self.encoder = nn.Linear(np.prod(
@@ -112,6 +112,9 @@ class Policy(nn.Module):
 
         self.value_head = nn.Linear(hidden_size, 1)
 
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.to(device)
+
     def forward(self, observations):
         device = self.encoder.weight.device
         observations = observations.to(device)
@@ -120,9 +123,11 @@ class Policy(nn.Module):
         return actions, value
 
     def encode_observations(self, observations):
-        '''Encodes a batch of observations into hidden states. Assumes
+        '''Encodes a batch of observations into a batch of hidden states. Assumes
         no time dimension (handled by LSTM wrappers).'''
         batch_size = observations.shape[0]
+        observations = observations.view(batch_size, -1)
+        # Ensure observations are on the same device as the encoder
         observations = observations.to(self.encoder.weight.device)
         return torch.relu(self.encoder(observations.float())), None
 
