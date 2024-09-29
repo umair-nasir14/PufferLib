@@ -9,7 +9,7 @@ import pufferlib.models
 
 
 class Recurrent(pufferlib.models.LSTMWrapper):
-    def __init__(self, env, policy, input_size=128, hidden_size=128, num_layers=4):
+    def __init__(self, env, policy, input_size=128, hidden_size=128, num_layers=2):
         super().__init__(env, policy, input_size, hidden_size, num_layers)
 
 class CNN_Policy(pufferlib.models.Convolutional):
@@ -113,6 +113,8 @@ class Policy(nn.Module):
         self.value_head = nn.Linear(hidden_size, 1)
 
     def forward(self, observations):
+        device = self.encoder.weight.device
+        observations = observations.to(device)
         hidden, lookup = self.encode_observations(observations)
         actions, value = self.decode_actions(hidden, lookup)
         return actions, value
@@ -121,7 +123,7 @@ class Policy(nn.Module):
         '''Encodes a batch of observations into hidden states. Assumes
         no time dimension (handled by LSTM wrappers).'''
         batch_size = observations.shape[0]
-        observations = observations.view(batch_size, -1)
+        observations = observations.to(self.encoder.weight.device)
         return torch.relu(self.encoder(observations.float())), None
 
     def decode_actions(self, hidden, lookup, concat=True):

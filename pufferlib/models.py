@@ -74,6 +74,7 @@ class LSTMWrapper(nn.Module):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.recurrent = nn.LSTM(input_size, hidden_size, num_layers)
+        self.recurrent = self.recurrent.to(self.policy.encoder.weight.device)
 
         for name, param in self.recurrent.named_parameters():
             if "bias" in name:
@@ -82,6 +83,7 @@ class LSTMWrapper(nn.Module):
                 nn.init.orthogonal_(param, 1.0)
 
     def forward(self, x, state):
+        device = self.policy.encoder.weight.device
         x_shape, space_shape = x.shape, self.obs_shape
         x_n, space_n = len(x_shape), len(space_shape)
         if x_shape[-space_n:] != space_shape:
@@ -103,6 +105,11 @@ class LSTMWrapper(nn.Module):
         hidden = hidden.reshape(B, TT, self.input_size)
 
         hidden = hidden.transpose(0, 1)
+
+        hidden = hidden.to(device)
+        if state is not None:
+            state = (state[0].to(device), state[1].to(device))
+
         hidden, state = self.recurrent(hidden, state)
         hidden = hidden.transpose(0, 1)
 
